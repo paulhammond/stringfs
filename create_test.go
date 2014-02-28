@@ -6,28 +6,36 @@ import (
 	"github.com/paulhammond/fakehttpfs"
 	"reflect"
 	"testing"
+	"time"
 )
 
-func TestCreate(t *testing.T) {
+var feb27 = time.Date(2014, 02, 27, 00, 00, 00, 0, time.UTC)
+var feb28 = time.Date(2014, 02, 28, 00, 00, 00, 0, time.UTC)
 
-	fs := fakehttpfs.FileSystem(
-		fakehttpfs.File("foo.txt", "foo"),
+var fakeFS = fakehttpfs.FileSystem(
+	fakehttpfs.File("foo.txt", "foo", feb28),
+	fakehttpfs.Dir("1",
+		fakehttpfs.File("foo.txt", "foo", feb28),
 		fakehttpfs.Dir("1",
-			fakehttpfs.File("foo.txt", "foo"),
-			fakehttpfs.Dir("1",
-				fakehttpfs.File("foo.txt", "foo"),
-			),
-			fakehttpfs.Dir("2",
-				fakehttpfs.File("foo.txt", "foo"),
-			),
+			fakehttpfs.File("foo.txt", "foo", feb28),
 		),
 		fakehttpfs.Dir("2",
-			fakehttpfs.File("foo.txt", "foo"),
-			fakehttpfs.File("bar.txt", "bar"),
+			fakehttpfs.File("foo.txt", "foo", feb28),
 		),
-	)
+	),
+	fakehttpfs.Dir("2",
+		fakehttpfs.File("foo.txt", "foo", feb28),
+		fakehttpfs.File("bar.txt", "bar", feb27),
+	),
+)
 
-	b, err := Create(fs)
+type testFile struct {
+	body    string
+	modTime time.Time
+}
+
+func TestCreate(t *testing.T) {
+	b, err := Create(fakeFS)
 	if err != nil {
 		t.Fatalf("unexpected error:", err)
 	}
@@ -37,7 +45,7 @@ func TestCreate(t *testing.T) {
 		t.Fatalf("unexpected error:", err)
 	}
 
-	contents := map[string]string{}
+	contents := map[string]testFile{}
 	for _, f := range reader.File {
 		body := make([]byte, f.UncompressedSize64)
 		rc, err := f.Open()
@@ -49,16 +57,19 @@ func TestCreate(t *testing.T) {
 			t.Fatalf("unexpected error:", err)
 		}
 		rc.Close()
-		contents[f.Name] = string(body)
+		contents[f.Name] = testFile{
+			body:    string(body),
+			modTime: f.ModTime(),
+		}
 	}
 
-	expected := map[string]string{
-		"foo.txt":     "foo",
-		"1/foo.txt":   "foo",
-		"1/1/foo.txt": "foo",
-		"1/2/foo.txt": "foo",
-		"2/foo.txt":   "foo",
-		"2/bar.txt":   "bar",
+	expected := map[string]testFile{
+		"foo.txt":     testFile{"foo", feb28},
+		"1/foo.txt":   testFile{"foo", feb28},
+		"1/1/foo.txt": testFile{"foo", feb28},
+		"1/2/foo.txt": testFile{"foo", feb28},
+		"2/foo.txt":   testFile{"foo", feb28},
+		"2/bar.txt":   testFile{"bar", feb27},
 	}
 	if !reflect.DeepEqual(contents, expected) {
 		t.Errorf("zip file contents don't match\nhave: %#v\nwant: %#v", contents, expected)

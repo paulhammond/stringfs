@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -29,7 +30,7 @@ func (zfs zipFS) addDir(name string) error {
 		if stat.IsDir() {
 			err = zfs.addDir(fileName)
 		} else {
-			err = zfs.addFile(fileName)
+			err = zfs.addFile(fileName, stat)
 		}
 		if err != nil {
 			return err
@@ -38,12 +39,17 @@ func (zfs zipFS) addDir(name string) error {
 	return nil
 }
 
-func (zfs zipFS) addFile(name string) error {
+func (zfs zipFS) addFile(name string, stat os.FileInfo) error {
 	file, err := zfs.fs.Open(name)
 	if err != nil {
 		return err
 	}
-	zf, err := zfs.zip.Create(name)
+	header, err := zip.FileInfoHeader(stat)
+	if err != nil {
+		return err
+	}
+	header.Name = name
+	zf, err := zfs.zip.CreateHeader(header)
 	if err != nil {
 		return err
 	}
