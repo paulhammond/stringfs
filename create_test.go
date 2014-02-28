@@ -3,6 +3,7 @@ package ziphttpfs
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"github.com/paulhammond/fakehttpfs"
 	"reflect"
 	"testing"
@@ -74,4 +75,23 @@ func TestCreate(t *testing.T) {
 	if !reflect.DeepEqual(contents, expected) {
 		t.Errorf("zip file contents don't match\nhave: %#v\nwant: %#v", contents, expected)
 	}
+}
+
+func TestCreateString(t *testing.T) {
+	str, err := CreateString(fakeFS)
+	if err != nil {
+		t.Fatalf("unexpected error:", err)
+	}
+	if str == "" {
+		t.Errorf("created empty zip file")
+	}
+	data, err := base64.StdEncoding.DecodeString(str)
+	if err != nil {
+		t.Errorf("string is not base64 encoded")
+	}
+	_, err = zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		t.Errorf("string is not a base64 encoded zip file")
+	}
+
 }

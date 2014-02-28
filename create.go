@@ -3,6 +3,7 @@ package ziphttpfs
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/base64"
 	"io"
 	"net/http"
 	"os"
@@ -70,4 +71,9 @@ func Create(fs http.FileSystem) ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func CreateString(fs http.FileSystem) (string, error) {
+	b, err := Create(fs)
+	return base64.StdEncoding.EncodeToString(b), err
 }
