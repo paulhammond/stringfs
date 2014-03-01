@@ -1,4 +1,4 @@
-package ziphttpfs
+package fs
 
 import (
 	"archive/zip"
