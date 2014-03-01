@@ -60,6 +60,13 @@ func New(str string) (http.FileSystem, error) {
 	return newFS(reader), nil
 }
 
+func Must(fs http.FileSystem, err error) http.FileSystem {
+	if err != nil {
+		panic(err)
+	}
+	return fs
+}
+
 func (fs fileSystem) Open(name string) (http.File, error) {
 	name = path.Clean(name)
 	if f, ok := fs.files[name]; ok {

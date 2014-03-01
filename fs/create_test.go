@@ -38,7 +38,7 @@ type testFile struct {
 }
 
 func TestCreate(t *testing.T) {
-	b, err := Create(fakeFS)
+	b, err := Create(fakeFS, nil)
 	if err != nil {
 		t.Fatalf("unexpected error:", err)
 	}
@@ -82,7 +82,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestCreateString(t *testing.T) {
-	str, err := CreateString(fakeFS)
+	str, err := CreateString(fakeFS, nil)
 	if err != nil {
 		t.Fatalf("unexpected error:", err)
 	}

@@ -5,14 +5,16 @@ import (
 	"bytes"
 	"encoding/base64"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path"
 )
 
 type zipFS struct {
-	fs  http.FileSystem
-	zip *zip.Writer
+	fs     http.FileSystem
+	zip    *zip.Writer
+	logger *log.Logger
 }
 
 func (zfs zipFS) addDir(name string) error {
@@ -55,13 +57,16 @@ func (zfs zipFS) addFile(name string, stat os.FileInfo) error {
 		return err
 	}
 	_, err = io.Copy(zf, file)
+	if zfs.logger != nil {
+		zfs.logger.Printf("Added %s", name)
+	}
 	return err
 }
 
-func Create(fs http.FileSystem) ([]byte, error) {
+func Create(fs http.FileSystem, l *log.Logger) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	w := zip.NewWriter(buf)
-	zfs := zipFS{fs, w}
+	zfs := zipFS{fs, w, l}
 	err := zfs.addDir(".")
 	if err != nil {
 		return nil, err
@@ -73,7 +78,7 @@ func Create(fs http.FileSystem) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func CreateString(fs http.FileSystem) (string, error) {
-	b, err := Create(fs)
+func CreateString(fs http.FileSystem, l *log.Logger) (string, error) {
+	b, err := Create(fs, l)
 	return base64.StdEncoding.EncodeToString(b), err
 }
