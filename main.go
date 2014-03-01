@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/paulhammond/stringfs/fs"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,10 +21,23 @@ func check(err error) {
 	}
 }
 
+func findPackage(dir string) string {
+	pkgs, err := parser.ParseDir(token.NewFileSet(), dir, nil, parser.PackageClauseOnly)
+	check(err)
+	if len(pkgs) != 1 {
+		fmt.Println("Could not autodetect package name, try -pkg flag")
+		os.Exit(1)
+	}
+	for pkg, _ := range pkgs {
+		return pkg
+	}
+	panic("unreachable")
+}
+
 func main() {
 
 	var varName = flag.String("var", "FileSystem", "Variable Name")
-	var pkgName = flag.String("pkg", "fs", "Package Name")
+	var pkgName = flag.String("pkg", "", "Package Name")
 	flag.Parse()
 
 	logger := log.New(os.Stdout, "", 0)
@@ -30,9 +45,13 @@ func main() {
 	args := flag.Args()
 	src := args[0]
 	dest := args[1]
+	destDir := filepath.Dir(dest)
 
-	dir := http.Dir(src)
-	s, err := fs.CreateString(dir, logger)
+	if *pkgName == "" {
+		*pkgName = findPackage(destDir)
+	}
+
+	s, err := fs.CreateString(http.Dir(src), logger)
 	check(err)
 
 	code := new(bytes.Buffer)
@@ -42,7 +61,7 @@ func main() {
 	fmt.Fprintf(code, "\t%s = fs.Must(fs.New(%q))\n", *varName, s)
 	fmt.Fprintf(code, "}\n")
 
-	err = os.MkdirAll(filepath.Dir(dest), 0777)
+	err = os.MkdirAll(destDir, 0777)
 	check(err)
 
 	err = ioutil.WriteFile(dest, code.Bytes(), 0666)
