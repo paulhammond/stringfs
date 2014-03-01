@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func check(err error) {
@@ -55,6 +56,7 @@ func main() {
 	check(err)
 
 	code := new(bytes.Buffer)
+	fmt.Fprintf(code, "// generated with `%v`\n\n", strings.Join(os.Args, " "))
 	fmt.Fprintf(code, "package %s\n\n", *pkgName)
 	fmt.Fprintf(code, "import \"github.com/paulhammond/stringfs/fs\"\n\n")
 	fmt.Fprintf(code, "func init() {\n\n")
