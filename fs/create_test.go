@@ -1,13 +1,17 @@
+// Copyright 2014 Paul Hammond.
+// This software is licensed under the MIT license, see LICENSE.txt for details.
+
 package fs
 
 import (
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
-	"github.com/paulhammond/fakehttpfs"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/paulhammond/fakehttpfs"
 )
 
 var feb27 = time.Date(2014, 02, 27, 00, 00, 00, 0, time.UTC)

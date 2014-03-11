@@ -1,3 +1,8 @@
+// Copyright 2014 Paul Hammond.
+// This software is licensed under the MIT license, see LICENSE.txt for details.
+
+// fs provides the implementation of stringfs. In most cases the stringfs
+// command can be used to generate the code that calls this package.
 package fs
 
 import (
@@ -47,6 +52,7 @@ func newFS(r *zip.Reader) http.FileSystem {
 	return fileSystem{files, dirMapsToSlices(dirs)}
 }
 
+// New returns the contents of str as a net/http FileSystem.
 func New(str string) (http.FileSystem, error) {
 	data, err := base64.StdEncoding.DecodeString(str)
 	if err != nil {
@@ -60,6 +66,8 @@ func New(str string) (http.FileSystem, error) {
 	return newFS(reader), nil
 }
 
+// Must is a helper function that can be used to wrap a call to New. It panics
+// if the returned error is non-nil.
 func Must(fs http.FileSystem, err error) http.FileSystem {
 	if err != nil {
 		panic(err)

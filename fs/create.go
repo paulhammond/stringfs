@@ -1,3 +1,6 @@
+// Copyright 2014 Paul Hammond.
+// This software is licensed under the MIT license, see LICENSE.txt for details.
+
 package fs
 
 import (
@@ -63,6 +66,8 @@ func (zfs zipFS) addFile(name string, stat os.FileInfo) error {
 	return err
 }
 
+// Create converts a net/http FileSystem to a byte slice. If a logger is
+// provided it is used to log informational messages.
 func Create(fs http.FileSystem, l *log.Logger) ([]byte, error) {
 	buf := new(bytes.Buffer)
 	w := zip.NewWriter(buf)
@@ -78,6 +83,8 @@ func Create(fs http.FileSystem, l *log.Logger) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// CreateString converts a net/http Filsystem into a string. If a logger is
+// provided it is used to log informational messages.
 func CreateString(fs http.FileSystem, l *log.Logger) (string, error) {
 	b, err := Create(fs, l)
 	return base64.StdEncoding.EncodeToString(b), err
