@@ -59,7 +59,7 @@ func main() {
 	fmt.Fprintf(code, "// generated with `%v`\n\n", strings.Join(os.Args, " "))
 	fmt.Fprintf(code, "package %s\n\n", *pkgName)
 	fmt.Fprintf(code, "import \"github.com/paulhammond/stringfs/fs\"\n\n")
-	fmt.Fprintf(code, "func init() {\n\n")
+	fmt.Fprintf(code, "func init() {\n")
 	fmt.Fprintf(code, "\t%s = fs.Must(fs.New(%q))\n", *varName, s)
 	fmt.Fprintf(code, "}\n")
 
