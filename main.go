@@ -37,7 +37,7 @@ func findPackage(dir string) string {
 
 func main() {
 
-	var varName = flag.String("var", "FileSystem", "Variable Name")
+	var varName = flag.String("var", "fileSystem", "Variable Name")
 	var pkgName = flag.String("pkg", "", "Package Name")
 	flag.Parse()
 
