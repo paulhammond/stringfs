@@ -2,9 +2,9 @@
 
 Stringfs is a go package that encodes a net/http filesystem into a string.
 
-Most web applications require a number of static assets such as images,
-CSS stylesheets etc. Stringfs provides a way to compile those assets into a
-single application binary for easier deployment.
+**⚠️This package is deprecated. You should use the
+[embed](https://golang.org/pkg/embed/) package instead of this one. It is better
+in every way.**
 
 ## Usage
 
